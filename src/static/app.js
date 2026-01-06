@@ -573,7 +573,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="share-icon">🔗</span>
             <span>Share</span>
           </button>
-          <div class="share-menu" id="share-menu-${name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}">
+          <div class="share-menu" id="${generateSafeId(name)}">>
             <button class="share-option" data-platform="twitter" data-activity="${escapeHtml(name)}">
               <span class="share-option-icon">🐦</span>
               <span>Twitter</span>
@@ -648,6 +648,18 @@ document.addEventListener("DOMContentLoaded", () => {
     activitiesList.appendChild(activityCard);
   }
 
+  // Generate a safe ID from activity name
+  function generateSafeId(name) {
+    // Create a simple hash from the string for ID generation
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      const char = name.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return 'share-menu-' + Math.abs(hash);
+  }
+
   // Escape HTML to prevent XSS
   function escapeHtml(text) {
     const div = document.createElement('div');
@@ -702,8 +714,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Fallback copy method for older browsers
-  // Uses deprecated document.execCommand as fallback when Clipboard API is unavailable
+  // Fallback copy method for older browsers that don't support Clipboard API
+  // Uses deprecated document.execCommand as intentional fallback for compatibility
   function fallbackCopyToClipboard(text) {
     const textArea = document.createElement("textarea");
     textArea.value = text;
