@@ -1,13 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Theme toggle elements
   const themeToggle = document.getElementById("theme-toggle");
-  const themeIcon = themeToggle.querySelector(".theme-icon");
+  const themeIcon = themeToggle ? themeToggle.querySelector(".theme-icon") : null;
 
   // Check for saved theme preference or default to light mode
   const currentTheme = localStorage.getItem("theme") || "light";
   if (currentTheme === "dark") {
     document.body.classList.add("dark-mode");
-    themeIcon.textContent = "☀️";
+    if (themeIcon) {
+      themeIcon.textContent = "☀️";
+    }
   }
 
   // Toggle theme function
@@ -16,14 +18,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const isDarkMode = document.body.classList.contains("dark-mode");
     
     // Update icon
-    themeIcon.textContent = isDarkMode ? "☀️" : "🌙";
+    if (themeIcon) {
+      themeIcon.textContent = isDarkMode ? "☀️" : "🌙";
+    }
     
     // Save preference
     localStorage.setItem("theme", isDarkMode ? "dark" : "light");
   }
 
   // Event listener for theme toggle
-  themeToggle.addEventListener("click", toggleTheme);
+  if (themeToggle) {
+    themeToggle.addEventListener("click", toggleTheme);
+  }
 
   // DOM elements
   const activitiesList = document.getElementById("activities-list");
