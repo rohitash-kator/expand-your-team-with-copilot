@@ -573,7 +573,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <span class="share-icon">🔗</span>
             <span>Share</span>
           </button>
-          <div class="share-menu" id="${generateSafeId(name)}">>
+          <div class="share-menu" id="${generateSafeId(name)}">>>
             <button class="share-option" data-platform="twitter" data-activity="${escapeHtml(name)}">
               <span class="share-option-icon">🐦</span>
               <span>Twitter</span>
