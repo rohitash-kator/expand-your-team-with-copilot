@@ -569,28 +569,28 @@ document.addEventListener("DOMContentLoaded", () => {
         `
         }
         <div class="share-container">
-          <button class="share-button" data-activity="${name}">
+          <button class="share-button" data-activity="${escapeHtml(name)}">
             <span class="share-icon">🔗</span>
             <span>Share</span>
           </button>
-          <div class="share-menu" id="share-menu-${name.replace(/\s+/g, '-')}">
-            <button class="share-option" data-platform="twitter" data-activity="${name}">
+          <div class="share-menu" id="share-menu-${name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '')}">
+            <button class="share-option" data-platform="twitter" data-activity="${escapeHtml(name)}">
               <span class="share-option-icon">🐦</span>
               <span>Twitter</span>
             </button>
-            <button class="share-option" data-platform="facebook" data-activity="${name}">
+            <button class="share-option" data-platform="facebook" data-activity="${escapeHtml(name)}">
               <span class="share-option-icon">📘</span>
               <span>Facebook</span>
             </button>
-            <button class="share-option" data-platform="whatsapp" data-activity="${name}">
+            <button class="share-option" data-platform="whatsapp" data-activity="${escapeHtml(name)}">
               <span class="share-option-icon">💬</span>
               <span>WhatsApp</span>
             </button>
-            <button class="share-option" data-platform="email" data-activity="${name}">
+            <button class="share-option" data-platform="email" data-activity="${escapeHtml(name)}">
               <span class="share-option-icon">✉️</span>
               <span>Email</span>
             </button>
-            <button class="share-option" data-platform="copy" data-activity="${name}">
+            <button class="share-option" data-platform="copy" data-activity="${escapeHtml(name)}">
               <span class="share-option-icon">📋</span>
               <span>Copy Link</span>
             </button>
@@ -648,6 +648,13 @@ document.addEventListener("DOMContentLoaded", () => {
     activitiesList.appendChild(activityCard);
   }
 
+  // Escape HTML to prevent XSS
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   // Handle sharing to different platforms
   function handleShare(platform, activityName, details) {
     const baseUrl = window.location.origin + window.location.pathname;
@@ -696,6 +703,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // Fallback copy method for older browsers
+  // Uses deprecated document.execCommand as fallback when Clipboard API is unavailable
   function fallbackCopyToClipboard(text) {
     const textArea = document.createElement("textarea");
     textArea.value = text;
