@@ -568,6 +568,34 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `
         }
+        <div class="share-container">
+          <button class="share-button" data-activity="${escapeHtml(name)}">
+            <span class="share-icon">🔗</span>
+            <span>Share</span>
+          </button>
+          <div class="share-menu" id="${generateSafeId(name)}">>>
+            <button class="share-option" data-platform="twitter" data-activity="${escapeHtml(name)}">
+              <span class="share-option-icon">🐦</span>
+              <span>Twitter</span>
+            </button>
+            <button class="share-option" data-platform="facebook" data-activity="${escapeHtml(name)}">
+              <span class="share-option-icon">📘</span>
+              <span>Facebook</span>
+            </button>
+            <button class="share-option" data-platform="whatsapp" data-activity="${escapeHtml(name)}">
+              <span class="share-option-icon">💬</span>
+              <span>WhatsApp</span>
+            </button>
+            <button class="share-option" data-platform="email" data-activity="${escapeHtml(name)}">
+              <span class="share-option-icon">✉️</span>
+              <span>Email</span>
+            </button>
+            <button class="share-option" data-platform="copy" data-activity="${escapeHtml(name)}">
+              <span class="share-option-icon">📋</span>
+              <span>Copy Link</span>
+            </button>
+          </div>
+        </div>
       </div>
     `;
 
@@ -576,6 +604,36 @@ document.addEventListener("DOMContentLoaded", () => {
     deleteButtons.forEach((button) => {
       button.addEventListener("click", handleUnregister);
     });
+
+    // Add click handler for share button
+    const shareButton = activityCard.querySelector(".share-button");
+    const shareMenu = activityCard.querySelector(".share-menu");
+    
+    if (shareButton && shareMenu) {
+      shareButton.addEventListener("click", (e) => {
+        e.stopPropagation();
+        // Close all other share menus
+        document.querySelectorAll(".share-menu.show").forEach((menu) => {
+          if (menu !== shareMenu) {
+            menu.classList.remove("show");
+          }
+        });
+        // Toggle this menu
+        shareMenu.classList.toggle("show");
+      });
+
+      // Add click handlers for share options
+      const shareOptions = activityCard.querySelectorAll(".share-option");
+      shareOptions.forEach((option) => {
+        option.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const platform = option.dataset.platform;
+          const activityName = option.dataset.activity;
+          handleShare(platform, activityName, details);
+          shareMenu.classList.remove("show");
+        });
+      });
+    }
 
     // Add click handler for register button (only when authenticated)
     if (currentUser) {
@@ -589,6 +647,102 @@ document.addEventListener("DOMContentLoaded", () => {
 
     activitiesList.appendChild(activityCard);
   }
+
+  // Generate a safe ID from activity name
+  function generateSafeId(name) {
+    // Create a simple hash from the string for ID generation
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      const char = name.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return 'share-menu-' + Math.abs(hash);
+  }
+
+  // Escape HTML to prevent XSS
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // Handle sharing to different platforms
+  function handleShare(platform, activityName, details) {
+    const baseUrl = window.location.origin + window.location.pathname;
+    const activityUrl = `${baseUrl}?activity=${encodeURIComponent(activityName)}`;
+    const formattedSchedule = formatSchedule(details);
+    
+    const shareText = `Check out ${activityName} at Mergington High School! ${details.description} Schedule: ${formattedSchedule}`;
+    const shareTitle = `${activityName} - Mergington High School`;
+
+    switch (platform) {
+      case "twitter":
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(activityUrl)}`;
+        window.open(twitterUrl, "_blank", "width=550,height=420");
+        break;
+
+      case "facebook":
+        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(activityUrl)}&quote=${encodeURIComponent(shareText)}`;
+        window.open(facebookUrl, "_blank", "width=550,height=420");
+        break;
+
+      case "whatsapp":
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText + " " + activityUrl)}`;
+        window.open(whatsappUrl, "_blank");
+        break;
+
+      case "email":
+        const emailSubject = encodeURIComponent(shareTitle);
+        const emailBody = encodeURIComponent(`${shareText}\n\nView more details at: ${activityUrl}`);
+        window.location.href = `mailto:?subject=${emailSubject}&body=${emailBody}`;
+        break;
+
+      case "copy":
+        // Copy link to clipboard
+        const textToCopy = `${shareText}\n\n${activityUrl}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(textToCopy).then(() => {
+            showMessage("Link copied to clipboard!", "success");
+          }).catch(() => {
+            fallbackCopyToClipboard(textToCopy);
+          });
+        } else {
+          fallbackCopyToClipboard(textToCopy);
+        }
+        break;
+    }
+  }
+
+  // Fallback copy method for older browsers that don't support Clipboard API
+  // Uses deprecated document.execCommand as intentional fallback for compatibility
+  function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+
+    try {
+      document.execCommand("copy");
+      showMessage("Link copied to clipboard!", "success");
+    } catch (err) {
+      showMessage("Failed to copy link. Please copy manually.", "error");
+    }
+
+    document.body.removeChild(textArea);
+  }
+
+  // Close share menus when clicking outside
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".share-container")) {
+      document.querySelectorAll(".share-menu.show").forEach((menu) => {
+        menu.classList.remove("show");
+      });
+    }
+  });
 
   // Event listeners for search and filter
   searchInput.addEventListener("input", (event) => {

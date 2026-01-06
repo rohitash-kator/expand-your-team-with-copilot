@@ -187,7 +187,9 @@ section h3 {
   margin-top: auto;
   padding-top: 10px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
 }
 
 /* Activity Tag */
@@ -663,4 +665,80 @@ footer {
 
 #logout-button:hover {
   background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Social sharing styles */
+.share-button {
+  background-color: var(--primary-light);
+  color: white;
+  border: none;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.share-button:hover {
+  background-color: var(--primary);
+  transform: scale(1.05);
+}
+
+.share-icon {
+  font-size: 0.9rem;
+}
+
+.share-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 100;
+  min-width: 150px;
+  margin-bottom: 4px;
+}
+
+.share-menu.show {
+  display: flex;
+}
+
+.share-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.share-option:hover {
+  background-color: var(--background);
+}
+
+.share-option-icon {
+  font-size: 1.1rem;
+}
+
+.share-container {
+  position: relative;
+  display: inline-block;
 }
